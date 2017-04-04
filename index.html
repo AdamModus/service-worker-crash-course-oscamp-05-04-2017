@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+	<html class="sl-root decks export offline loaded">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Service Worker Crash Course - msoscamp: Slides</title>
+		<meta name="description" content="Slides">
+
+		<link rel="stylesheet" type="text/css" href="lib/offline-v2.css">
+
+
+
+		<!-- User CSS -->
+		<style id="user-css-output" type="text/css">
+			.reveal .rafa-cog {
+  animation-name: rotate;
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.reveal .arrow-move {
+  animation-name: move-line;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes move-line {
+  from {
+    transform: translateX(0px);
+  }
+  to {
+    transform: translateX(100px);
+  }
+}
+
+		</style>
+	</head>
+	<body class="reveal-viewport theme-font-montserrat theme-color-asphalt-orange">
+		<div class="reveal">
+			<div class="slides">
+				<section data-id="03613b9a8ea78da79be802acd72713d5"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="f7662c8db412884b48c3757374fad0fb"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 13; text-align: center;" dir="ui">
+<h1>Service Worker</h1>
+<h2>Crash Course</h2>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 640px; height: 308px; left: 160px; top: 210px;" data-block-id="1fdb88fd29e0caad04ac9019a0558955"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="888" data-natural-height="428" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/017315fc5a79853cf40bd273609c69c6.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="1d0a429388e1b4d4b2ddab434e7624d8"><div class="sl-block-content" style="z-index: 12;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 197px; height: 95px; left: 763px; top: 605px;" data-block-id="5f698bfe98c1a8459936ba3ca9911d5d"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="1114" data-natural-height="536" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/80111a977f9b9a385c2b83b4ebfaa728.png"></div></div></section><section data-id="5ecbb3fa6da21e60a4d095b42f08b616"><div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 960px; height: 538px; left: 0px; top: 120px;" data-block-id="a312e20e94729238428eaf69ed1deed6"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="2356" data-natural-height="1320" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/49ded95ffa60393122d50f6d6c002fb5.png"></div></div>
+<div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="b530eae2efee7f686d54804701af46cd"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Thank you to</h1>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 80px; height: 84px; left: 800px; top: 0px;" data-block-id="25b429e9ecf5dc838beb209880033852"><div class="sl-block-content" data-shape-type="symbol-thin-arrow-down" data-shape-fill-color="rgb(255, 255, 255)" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="4 2 24 28"><g class="shape-element" fill="rgb(255, 255, 255)"><path d="M4.586 19.414l10 10c0.781 0.781 2.047 0.781 2.828 0l10-10c0.781-0.781 0.781-2.047 0-2.828s-2.047-0.781-2.828 0l-6.586 6.586v-19.172c0-1.105-0.895-2-2-2s-2 0.895-2 2v19.172l-6.586-6.586c-0.391-0.39-0.902-0.586-1.414-0.586s-1.024 0.195-1.414 0.586c-0.781 0.781-0.781 2.047 0 2.828z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 80px; height: 84px; left: 80px; top: 0px;" data-block-id="55031e47b91e8675b7c22e025bd21530"><div class="sl-block-content" data-shape-type="symbol-thin-arrow-down" data-shape-fill-color="rgb(255, 255, 255)" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="4 2 24 28"><g class="shape-element" fill="rgb(255, 255, 255)"><path d="M4.586 19.414l10 10c0.781 0.781 2.047 0.781 2.828 0l10-10c0.781-0.781 0.781-2.047 0-2.828s-2.047-0.781-2.828 0l-6.586 6.586v-19.172c0-1.105-0.895-2-2-2s-2 0.895-2 2v19.172l-6.586-6.586c-0.391-0.39-0.902-0.586-1.414-0.586s-1.024 0.195-1.414 0.586c-0.781 0.781-0.781 2.047 0 2.828z"></path></g></svg></div></div></section><section data-id="d09ef1adbfe84c2f95ab5f8f2764414b">
+
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 960px; left: 0px; top: 351px;" data-block-id="f2de9f4d1f32b1f8987af27d14106d70"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p><span style="font-size:1.0em">Rafael Fernandes</span></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 220px; height: 221px; left: 371px; top: 110px;" data-block-id="d53c7f8f3789474d16930e0aa0f56fd4"><div class="sl-block-content" style="z-index: 12; border-style: solid; border-color: rgb(201, 218, 248); border-width: 6px; border-radius: 144px;"><img data-natural-width="1346" data-natural-height="1350" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/5163648e0e8ab04f26bae89ec9fb4f11.jpg"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 168px; height: 140px; left: 712px; top: 420px;" data-block-id="af54b7fa71153234528acb5885876207"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="800" data-natural-height="665" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/685b256cc8eab3633978f2978425794b.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 140px; height: 140px; left: 80px; top: 420px;" data-block-id="6e55d3d29a77918448d9b117607d06ec"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="512" data-natural-height="512" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/8f3e6187ac29c84008ad25ecf88a0a56.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 313px; height: 140px; left: 325px; top: 420px;" data-block-id="3d1d293b3749eec9bee512979fa144ed"><div class="sl-block-content" style="z-index: 15;"><img data-natural-width="422" data-natural-height="189" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/9e880fe2e0bf7e1ccc9d448515ca7804.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 319px; left: 641px; top: 560px;" data-block-id="22a6b190b07cc7c8875789e48fbd0f04"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 16;">
+<p><span style="font-size:0.7em">AdamModus</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 320px; left: 0px; top: 560px;" data-block-id="dd833c5f4a980983c24b370679fd52da"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 17;">
+<p><span style="font-size:0.7em">@AdamModus</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 480px; left: 240px; top: 560px;" data-block-id="ae593f8bc9ea9a583c8499b6e967ec2e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18;">
+<p><span style="font-size:0.7em">https://adammode.xyz</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 31px;" data-block-id="c53c09195dfbd8ffa7414373f9fb7643"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 19;">
+<p>Boas pessoal!</p>
+</div></div></section><section data-id="d7750d1ac4c06754a37442f699f63345">
+
+
+
+
+
+
+
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 181px; top: 510px;" data-block-id="2522f1640d0d696ae447c0bf1fbc80cb"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h3>Amsterdam</h3>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 747px; height: 420px; left: 107px; top: 70px;" data-block-id="dca6f1ebf61610350fd36c8918faefe3"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1240" data-natural-height="697" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/70042b7b8f762179cb73f629a0253489.jpg"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="991b306952ad4489a9167c76d08c3170"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 197px; height: 95px; left: 763px; top: 605px;" data-block-id="65936775254ea909ae281670a2a822e7"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="1114" data-natural-height="536" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/80111a977f9b9a385c2b83b4ebfaa728.png"></div></div></section><section data-id="976a2fbc130cfa251f15d0331218fae0"><div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="bb737e4c4f560b9495817779f6b95631"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 274px; height: 168px; left: 343px; top: 70px;" data-block-id="422313e56279d076b51980e121a2f15a"><div class="sl-block-content" style="z-index: 12;"><img data-natural-width="350" data-natural-height="214" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/1b127d3366714824d6e771435194cc0a.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 240px; left: 720px; top: 311px;" data-block-id="ebd96753779fde8a34da43e17f728c77"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p>That's me!</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 465px; height: 310px; left: 248px; top: 280px;" data-block-id="d9b892aed3d34c576a4060fb14e17b71"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="1030" data-natural-height="687" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/62b82662851312c766b35ec441a392b2.jpg"></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 117px; height: 50px; left: 645px; top: 343px;" data-block-id="161c210e85894c9884033eb333fbb2a7"><div class="sl-block-style" style="z-index: 15; transform: rotate(342deg);"><div class="sl-block-content" data-shape-type="arrow-left" data-shape-fill-color="rgb(238, 238, 238)" data-shape-stretch="true" style="z-index: 15;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 117 50"><polygon points="117,15 58.5,15 58.5,0 0,25 58.5,50 58.5,35 117,35 117,15" class="shape-element" fill="rgb(238, 238, 238)"></polygon></svg></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 480px; left: 240px; top: 605px;" data-block-id="9c7c4d3aea74da57dfdd49d3141f73bc"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 16;">
+<p>Rabobank</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 197px; height: 95px; left: 763px; top: 605px;" data-block-id="f3373c5328884c144222113e79f9c5f7"><div class="sl-block-content" style="z-index: 17;"><img data-natural-width="1114" data-natural-height="536" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/80111a977f9b9a385c2b83b4ebfaa728.png"></div></div></section><section data-id="524976586305e50a7aa7c7b63a475a62"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="c87819a822f2725405d461a4f76846de"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Agenda</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="71c88b8870c5a4f96e4158195e850ab2"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 960px; left: 0px; top: 141px;" data-block-id="6c5d0f01e52fe19f0759678437d2bb2a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;" dir="ui">
+<ul>
+	<li><span style="font-size:1.0em">What are service workers</span></li>
+	<li><span style="font-size:1.0em">Philosophy behind service workers</span></li>
+	<li><span style="font-size:1.0em">Service worker life cycle</span></li>
+	<li><span style="font-size:1.0em">Service worker updates </span></li>
+	<li><span style="font-size:1.0em">Last minute special: state changes</span></li>
+	<li><span style="font-size:1.0em">After class extras</span></li>
+	<li><span style="font-size:1.0em">Q&amp;A</span></li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 197px; height: 95px; left: 763px; top: 605px;" data-block-id="9c0a0d8b01ab4cee6e9661c843e5a258"><div class="sl-block-content" style="z-index: 15;"><img data-natural-width="1114" data-natural-height="536" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/80111a977f9b9a385c2b83b4ebfaa728.png"></div></div></section><section class="stack" data-id="7400428509f4d4e5feabfd486f80524a"><section data-id="44ccd4ab18d2fcd80f2389bf2071bed8"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="2fb3461c30fa48f2a063f063ada4fcd6"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Workers?</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="4a1375ff5ccb848eb4e1a9eea975860f"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="15bb292cb911f87007d869ac35c40c6d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p style="color:rgb(255, 255, 255); text-align:left">Has its own <span style="color:#FFD700">thread </span>(remember web workers?)</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">No DOM access!</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">Caching</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">Versioning</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left"><span style="color:rgb(255, 255, 255); text-align:left">Allows </span><span style="color:#FFD700"><span style="text-align:left">offline functionality</span></span></p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">Able to <span style="color:#FFD700">intercept fetch</span> requests</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">Useful in slow connectivity scenarios / li-fi</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">It's still all <span style="color:#FFD700">javascript</span>!</p>
+</div></div></section><section data-id="9f1a3d9243d27b0adbf3656ec89d3a5b"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="da85daea63811f1f914ef385444bbdf0"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Workers?</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="1db35920e37729eb2565681c308cd137"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 130px; height: 130px; left: 240px; top: 260px;" data-block-id="0721e0b860c0e4293d4b19f75c5e028e"><div class="sl-block-content" style="z-index: 12;" data-inline-svg="true">
+<img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/ca70de1de5ebddeb4af36c61978f9f99.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" height="128" id="Layer_1" version="1.1" viewbox="0 0 128 128" width="128" xml:space="preserve" preserveaspectratio="xMidYMid meet"><g><g><path d="M56,40H24v32h32V40z M24,88h80v-8H24V88z M24,104h80v-8H24V104z M64,40v8h40v-8H64z M64,64h40v-8H64V64z" fill="#B0BEC5"></path></g></g><path d="M120,0H8C3.59,0,0,3.59,0,8v112c0,4.41,3.59,8,8,8h112c4.41,0,8-3.59,8-8V8C128,3.59,124.41,0,120,0z M100,8  c2.211,0,4,1.789,4,4s-1.789,4-4,4s-4-1.789-4-4S97.789,8,100,8z M28,8h56c2.211,0,4,1.789,4,4s-1.789,4-4,4H28  c-2.211,0-4-1.789-4-4S25.789,8,28,8z M12,8c2.211,0,4,1.789,4,4s-1.789,4-4,4s-4-1.789-4-4S9.789,8,12,8z M120,112  c0,4.41-3.59,8-8,8H16c-4.41,0-8-3.59-8-8V32c0-4.41,3.59-8,8-8h96c4.41,0,8,3.59,8,8V112z M116,16c-2.211,0-4-1.789-4-4  s1.789-4,4-4s4,1.789,4,4S118.211,16,116,16z" fill="#546E7A"></path></svg>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 63px; height: 47px; left: 400px; top: 260px;" data-block-id="ac9dbd3ef2963823eaf5adf0e51ba5aa"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 140px; left: 235px; top: 401px;" data-block-id="3530e5f9075389d7663500c3887867e6"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<p>web page</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 118px; height: 118px; left: 581px; top: 260px;" data-block-id="fbf185cccef51300c35dbde6f83f20f5"><div class="sl-block-content" style="z-index: 16;" data-inline-svg="true">
+<img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/3b4014bb745dacee927eca552603505f.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" id="Layer_1" version="1.1" viewbox="0 0 128 128" xml:space="preserve" width="128" height="128" preserveaspectratio="xMidYMid meet"><circle cx="64" cy="64" fill="#4B5F83" id="circle" r="64"></circle><g id="server_2_"><g id="bottom_lines"><rect fill="#22313F" height="3" id="right" width="10" x="34" y="84"></rect><rect fill="#22313F" height="3" id="left" width="10" x="83.9" y="84"></rect></g><g id="_x30_2_1_"><rect fill="#E6E6E6" height="3" id="line" width="60" x="34" y="61"></rect><path d="M95,84H33c-2.2,0-4-1.8-4-4V68c0-2.2,1.8-4,4-4h62c2.2,0,4,1.8,4,4v12C99,82.2,97.2,84,95,84z" fill="#FFFFFF" id="bg_1_"></path><circle cx="90.9" cy="74" fill="#26A65B" id="green_1_" r="3"></circle><circle cx="81.9" cy="74" fill="#CF000F" id="red_1_" r="3"></circle><g id="lines_1_"><rect fill="#E6E6E6" height="10" id="line_6_" width="3" x="34" y="69"></rect><rect fill="#E6E6E6" height="10" id="line_5_" width="3" x="40" y="69"></rect><rect fill="#E6E6E6" height="10" id="line_4_" width="3" x="46" y="69"></rect></g></g><g id="_x30_1"><path d="M95,61H33c-2.2,0-4-1.8-4-4V45c0-2.2,1.8-4,4-4h62c2.2,0,4,1.8,4,4v12C99,59.2,97.2,61,95,61z" fill="#FFFFFF" id="bg"></path><circle cx="90.9" cy="51" fill="#26A65B" id="green" r="3"></circle><circle cx="81.9" cy="51" fill="#CF000F" id="red" r="3"></circle><g id="lines"><rect fill="#E6E6E6" height="10" id="line_3_" width="3" x="34" y="46"></rect><rect fill="#E6E6E6" height="10" id="line_2_" width="3" x="40" y="46"></rect><rect fill="#E6E6E6" height="10" id="line_1_" width="3" x="46" y="46"></rect></g></g></g></svg>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 63px; height: 47px; left: 497px; top: 331px;" data-block-id="9aa0c7cbbaaa5708f15b34bda4d6208a"><div class="sl-block-style" style="z-index: 17; transform: rotate(180deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 17;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 139px; left: 571px; top: 400px;" data-block-id="ab932b83a4914606991843714f9b68d6"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18;">
+<p>server</p>
+</div></div></section><section data-id="8c26bc1bd9bf34179f92d026da15aae3"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="8a9cccb53ebc223dd73eb3f27983a6ba"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Workers?</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="ef68c93864e0b3051ed09167b541fdf2"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 114px;" data-block-id="0c84f61baa1b4dffeb9aa2fee42394cd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; text-align: center;">
+<p style="color:rgb(255, 255, 255); text-align:left">And why should I care?</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 183px; top: 591px;" data-block-id="dc611159b60387a633cf358496ea77aa"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p><span style="text-align:left">The worst we can do to the user is give him </span><span style="color:rgb(255, 215, 0); text-align:left">nothing</span><span style="color:rgb(255, 255, 255); text-align:left">!</span></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 531px; height: 350px; left: 217px; top: 210px;" data-block-id="85ad40d6e28cbe007e657cb6a703e87c"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="358" data-natural-height="236" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f680775735b781c3c1f951b8d61c1236.gif"></div></div></section><section data-id="ee06c7c5ac891c69a0039ee270045d34"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="893ca56a423731cbc2bb72aacd3da6c2"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Service Workers?</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="f6963166b3d1ae743090e3c745126ae1"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="width: 110px; height: 110px; left: 426px; top: 211px;" data-block-id="84e2f4adb27c181f6aae68b295387091"><div class="sl-block-content rafa-cog" style="z-index: 13;" data-inline-svg="true">
+<img data-natural-width="512" data-natural-height="512" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/8605f6c5b30f5235fcc21c94e9c4aecb.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512" id="Layer_1" version="1.1" viewbox="0 0 512 512" xml:space="preserve" width="512" height="512" preserveaspectratio="xMidYMid meet"><g><path d="M256,153.5c56.5,0,102.5,46,102.5,102.5s-46,102.5-102.5,102.5s-102.5-46-102.5-102.5   S199.5,153.5,256,153.5 M256,131.5c-68.6,0-124.5,55.8-124.5,124.5S187.4,380.5,256,380.5S380.5,324.6,380.5,256   S324.6,131.5,256,131.5L256,131.5z" fill="#6A6E7C"></path><path d="M278.4,22l10.1,53.8c1.5,8.1,7.5,14.7,15.4,17.1c11.5,3.4,22.5,7.9,32.5,13.3c3.3,1.8,6.9,2.6,10.4,2.6   c4.4,0,8.7-1.3,12.4-3.8l45.8-31.4l33.2,33.2L407,152.6c-4.7,6.8-5.1,15.6-1.2,22.9c5.3,9.8,9.7,20.4,13,31.6   c2.4,7.9,8.9,13.8,17,15.3l54.1,10.2v46.9l-54.1,10.1c-8.1,1.5-14.7,7.4-17,15.3c-3.4,11.4-7.9,22.2-13.3,32.2   c-3.9,7.3-3.5,16.1,1.2,22.9l31,45.3l-33.2,33.1L359,407.2c-3.7-2.6-8.1-3.8-12.4-3.8c-3.6,0-7.1,0.9-10.4,2.6   c-10,5.4-20.9,9.8-32.2,13.1c-7.9,2.3-13.9,8.9-15.4,17.1L278.5,490h-46.9l-10.2-54.4c-1.5-8-7.3-14.6-15.2-17   c-10.9-3.4-21.3-7.7-30.9-12.9c-3.3-1.8-6.9-2.6-10.5-2.6c-4.4,0-8.7,1.3-12.4,3.8l-44.9,30.7l-33.2-33.2l30.7-44.9   c4.6-6.8,5.1-15.6,1.2-22.9c-5.4-9.9-9.8-20.6-13.1-31.8c-2.4-7.9-8.9-13.8-17-15.3L22,279.4v-46.9l54.1-10.1   c8.1-1.5,14.6-7.4,17-15.3c3.3-11,7.6-21.5,12.8-31.2c3.9-7.2,3.4-16-1.2-22.8l-31.1-45.5l33.2-33.2l45.2,30.9   c3.7,2.6,8.1,3.8,12.4,3.8c3.6,0,7.2-0.9,10.5-2.7c9.7-5.3,20.2-9.7,31.2-13c7.8-2.4,13.7-8.9,15.2-17L231.5,22H278.4 M286.1,0   h-62.2c-5.9,0-11.5,4.7-12.5,10.4l-11.6,62c-12.3,3.8-24.2,8.7-35.3,14.7l-51.5-35.3c-2.1-1.4-4.6-2.1-7.1-2.1   c-3.4,0-6.8,1.2-9.1,3.6l-44,44c-4.1,4.1-4.8,11.4-1.5,16.2l35.5,51.8c-6,11.1-10.8,23-14.5,35.3l-61.7,11.6   C4.7,213.4,0,219,0,224.8V287c0,5.9,4.7,11.5,10.4,12.5L72,311.1c3.8,12.6,8.7,24.7,14.8,36l-35.1,51.3c-3.3,4.8-2.6,12.1,1.5,16.2   l44,44c2.4,2.4,5.8,3.6,9.1,3.6c2.5,0,5-0.7,7.1-2.1l51.3-35.1c11,6,22.7,10.8,34.9,14.6l11.6,62c1.1,5.7,6.7,10.4,12.5,10.4h62.2   c5.9,0,11.5-4.7,12.5-10.4l11.5-61.4c12.7-3.7,24.9-8.7,36.4-14.8l51.9,35.5c2.1,1.4,4.6,2.1,7.1,2.1c3.4,0,6.8-1.2,9.1-3.6l44-44   c4.1-4.1,4.8-11.4,1.5-16.2l-35.3-51.6c6.2-11.5,11.3-23.7,15.1-36.4l61.6-11.6c5.7-1.1,10.4-6.7,10.4-12.5v-62.2   c0-5.9-4.7-11.5-10.4-12.5l-61.7-11.6c-3.7-12.5-8.7-24.4-14.7-35.7l35.7-52.2c3.3-4.8,2.6-12.1-1.5-16.2l-44-44   c-2.4-2.4-5.8-3.6-9.1-3.6c-2.5,0-5,0.7-7.1,2.1l-52.2,35.7c-11.6-6.2-23.9-11.3-36.8-15l-11.5-61.4C297.6,4.7,292,0,286.1,0   L286.1,0z" fill="#6A6E7C"></path></g></svg>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 140px; left: 411px; top: 351px;" data-block-id="43f54e52a5da328558014f43d7927dab"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p>SW.js</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 130px; height: 130px; left: 81px; top: 210px;" data-block-id="7e0a64657fade58a6de6d1814124bc58"><div class="sl-block-content" style="z-index: 15;" data-inline-svg="true">
+<img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/ca70de1de5ebddeb4af36c61978f9f99.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" height="128" id="Layer_1" version="1.1" viewbox="0 0 128 128" width="128" xml:space="preserve" preserveaspectratio="xMidYMid meet"><g><g><path d="M56,40H24v32h32V40z M24,88h80v-8H24V88z M24,104h80v-8H24V104z M64,40v8h40v-8H64z M64,64h40v-8H64V64z" fill="#B0BEC5"></path></g></g><path d="M120,0H8C3.59,0,0,3.59,0,8v112c0,4.41,3.59,8,8,8h112c4.41,0,8-3.59,8-8V8C128,3.59,124.41,0,120,0z M100,8  c2.211,0,4,1.789,4,4s-1.789,4-4,4s-4-1.789-4-4S97.789,8,100,8z M28,8h56c2.211,0,4,1.789,4,4s-1.789,4-4,4H28  c-2.211,0-4-1.789-4-4S25.789,8,28,8z M12,8c2.211,0,4,1.789,4,4s-1.789,4-4,4s-4-1.789-4-4S9.789,8,12,8z M120,112  c0,4.41-3.59,8-8,8H16c-4.41,0-8-3.59-8-8V32c0-4.41,3.59-8,8-8h96c4.41,0,8,3.59,8,8V112z M116,16c-2.211,0-4-1.789-4-4  s1.789-4,4-4s4,1.789,4,4S118.211,16,116,16z" fill="#546E7A"></path></svg>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 241px; top: 210px;" data-block-id="e46ce9270229374c9d22484634a6cd08"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 140px; left: 76px; top: 351px;" data-block-id="d20e4b4467ab9af0c257e32f6a0223e4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 17;">
+<p>web page</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 118px; height: 118px; left: 742px; top: 211px;" data-block-id="810ca560bbd8e45218b3fdc8a27e458c"><div class="sl-block-content" style="z-index: 18;" data-inline-svg="true">
+<img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/3b4014bb745dacee927eca552603505f.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" id="Layer_1" version="1.1" viewbox="0 0 128 128" xml:space="preserve" width="128" height="128" preserveaspectratio="xMidYMid meet"><circle cx="64" cy="64" fill="#4B5F83" id="circle" r="64"></circle><g id="server_2_"><g id="bottom_lines"><rect fill="#22313F" height="3" id="right" width="10" x="34" y="84"></rect><rect fill="#22313F" height="3" id="left" width="10" x="83.9" y="84"></rect></g><g id="_x30_2_1_"><rect fill="#E6E6E6" height="3" id="line" width="60" x="34" y="61"></rect><path d="M95,84H33c-2.2,0-4-1.8-4-4V68c0-2.2,1.8-4,4-4h62c2.2,0,4,1.8,4,4v12C99,82.2,97.2,84,95,84z" fill="#FFFFFF" id="bg_1_"></path><circle cx="90.9" cy="74" fill="#26A65B" id="green_1_" r="3"></circle><circle cx="81.9" cy="74" fill="#CF000F" id="red_1_" r="3"></circle><g id="lines_1_"><rect fill="#E6E6E6" height="10" id="line_6_" width="3" x="34" y="69"></rect><rect fill="#E6E6E6" height="10" id="line_5_" width="3" x="40" y="69"></rect><rect fill="#E6E6E6" height="10" id="line_4_" width="3" x="46" y="69"></rect></g></g><g id="_x30_1"><path d="M95,61H33c-2.2,0-4-1.8-4-4V45c0-2.2,1.8-4,4-4h62c2.2,0,4,1.8,4,4v12C99,59.2,97.2,61,95,61z" fill="#FFFFFF" id="bg"></path><circle cx="90.9" cy="51" fill="#26A65B" id="green" r="3"></circle><circle cx="81.9" cy="51" fill="#CF000F" id="red" r="3"></circle><g id="lines"><rect fill="#E6E6E6" height="10" id="line_3_" width="3" x="34" y="46"></rect><rect fill="#E6E6E6" height="10" id="line_2_" width="3" x="40" y="46"></rect><rect fill="#E6E6E6" height="10" id="line_1_" width="3" x="46" y="46"></rect></g></g></g></svg>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 561px; top: 211px;" data-block-id="f8921d215e051cfaf9f625ed311b66c2"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 19;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 338px; top: 281px;" data-block-id="68b6735680ebec6d834c268e8792c916"><div class="sl-block-style" style="z-index: 20; transform: rotate(180deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 20;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 658px; top: 282px;" data-block-id="6f3db22cf54b74c21cff3b1cde6c04a6"><div class="sl-block-style" style="z-index: 21; transform: rotate(180deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 21;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 139px; left: 732px; top: 351px;" data-block-id="f34c2c28d0ba8dd557775303aa2712da"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 22;">
+<p>server</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 532px; top: 367px;" data-block-id="d88546ae1dcbd21dae18280f87059eb8"><div class="sl-block-style" style="z-index: 23; transform: rotate(45deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 23;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 561px; top: 486px;" data-block-id="13de5f084cda7e1aaf83935aee5deaf6"><div class="sl-block-style" style="z-index: 24; transform: rotate(225deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 24;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 408px; left: 486px; top: 640px;" data-block-id="faf2c42151cfd75616fc7838cfa62e18"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 25;">
+<p>Cache storage (sw cache)</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 131px; height: 131px; left: 631px; top: 510px;" data-block-id="9414f652e92a0746c9f6d717b299d523"><div class="sl-block-content" style="z-index: 26;"><img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/96ca9d44ec060923b991130325a10d48.svg"></div></div></section><section data-id="c675ed537804521232f0ced6f82d51ca"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="a52c0bb59b85af98de6bd030ff66d8d6"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Service Workers?</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="272d38ee64505e0691b5c64bfe8572b0"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="width: 110px; height: 110px; left: 426px; top: 211px;" data-block-id="64e5dd1e0eb513c97f188f0c0b635d9b"><div class="sl-block-content rafa-cog" style="z-index: 13;" data-inline-svg="true">
+<img data-natural-width="512" data-natural-height="512" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/8605f6c5b30f5235fcc21c94e9c4aecb.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512" id="Layer_1" version="1.1" viewbox="0 0 512 512" xml:space="preserve" width="512" height="512" preserveaspectratio="xMidYMid meet"><g><path d="M256,153.5c56.5,0,102.5,46,102.5,102.5s-46,102.5-102.5,102.5s-102.5-46-102.5-102.5   S199.5,153.5,256,153.5 M256,131.5c-68.6,0-124.5,55.8-124.5,124.5S187.4,380.5,256,380.5S380.5,324.6,380.5,256   S324.6,131.5,256,131.5L256,131.5z" fill="#6A6E7C"></path><path d="M278.4,22l10.1,53.8c1.5,8.1,7.5,14.7,15.4,17.1c11.5,3.4,22.5,7.9,32.5,13.3c3.3,1.8,6.9,2.6,10.4,2.6   c4.4,0,8.7-1.3,12.4-3.8l45.8-31.4l33.2,33.2L407,152.6c-4.7,6.8-5.1,15.6-1.2,22.9c5.3,9.8,9.7,20.4,13,31.6   c2.4,7.9,8.9,13.8,17,15.3l54.1,10.2v46.9l-54.1,10.1c-8.1,1.5-14.7,7.4-17,15.3c-3.4,11.4-7.9,22.2-13.3,32.2   c-3.9,7.3-3.5,16.1,1.2,22.9l31,45.3l-33.2,33.1L359,407.2c-3.7-2.6-8.1-3.8-12.4-3.8c-3.6,0-7.1,0.9-10.4,2.6   c-10,5.4-20.9,9.8-32.2,13.1c-7.9,2.3-13.9,8.9-15.4,17.1L278.5,490h-46.9l-10.2-54.4c-1.5-8-7.3-14.6-15.2-17   c-10.9-3.4-21.3-7.7-30.9-12.9c-3.3-1.8-6.9-2.6-10.5-2.6c-4.4,0-8.7,1.3-12.4,3.8l-44.9,30.7l-33.2-33.2l30.7-44.9   c4.6-6.8,5.1-15.6,1.2-22.9c-5.4-9.9-9.8-20.6-13.1-31.8c-2.4-7.9-8.9-13.8-17-15.3L22,279.4v-46.9l54.1-10.1   c8.1-1.5,14.6-7.4,17-15.3c3.3-11,7.6-21.5,12.8-31.2c3.9-7.2,3.4-16-1.2-22.8l-31.1-45.5l33.2-33.2l45.2,30.9   c3.7,2.6,8.1,3.8,12.4,3.8c3.6,0,7.2-0.9,10.5-2.7c9.7-5.3,20.2-9.7,31.2-13c7.8-2.4,13.7-8.9,15.2-17L231.5,22H278.4 M286.1,0   h-62.2c-5.9,0-11.5,4.7-12.5,10.4l-11.6,62c-12.3,3.8-24.2,8.7-35.3,14.7l-51.5-35.3c-2.1-1.4-4.6-2.1-7.1-2.1   c-3.4,0-6.8,1.2-9.1,3.6l-44,44c-4.1,4.1-4.8,11.4-1.5,16.2l35.5,51.8c-6,11.1-10.8,23-14.5,35.3l-61.7,11.6   C4.7,213.4,0,219,0,224.8V287c0,5.9,4.7,11.5,10.4,12.5L72,311.1c3.8,12.6,8.7,24.7,14.8,36l-35.1,51.3c-3.3,4.8-2.6,12.1,1.5,16.2   l44,44c2.4,2.4,5.8,3.6,9.1,3.6c2.5,0,5-0.7,7.1-2.1l51.3-35.1c11,6,22.7,10.8,34.9,14.6l11.6,62c1.1,5.7,6.7,10.4,12.5,10.4h62.2   c5.9,0,11.5-4.7,12.5-10.4l11.5-61.4c12.7-3.7,24.9-8.7,36.4-14.8l51.9,35.5c2.1,1.4,4.6,2.1,7.1,2.1c3.4,0,6.8-1.2,9.1-3.6l44-44   c4.1-4.1,4.8-11.4,1.5-16.2l-35.3-51.6c6.2-11.5,11.3-23.7,15.1-36.4l61.6-11.6c5.7-1.1,10.4-6.7,10.4-12.5v-62.2   c0-5.9-4.7-11.5-10.4-12.5l-61.7-11.6c-3.7-12.5-8.7-24.4-14.7-35.7l35.7-52.2c3.3-4.8,2.6-12.1-1.5-16.2l-44-44   c-2.4-2.4-5.8-3.6-9.1-3.6c-2.5,0-5,0.7-7.1,2.1l-52.2,35.7c-11.6-6.2-23.9-11.3-36.8-15l-11.5-61.4C297.6,4.7,292,0,286.1,0   L286.1,0z" fill="#6A6E7C"></path></g></svg>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 140px; left: 411px; top: 351px;" data-block-id="d40abee1683b3ee59eb1eddc2f2efb80"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p>SW.js</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 130px; height: 130px; left: 81px; top: 210px;" data-block-id="65a64d77c819a3b30b871f67ffebe8cf"><div class="sl-block-content" style="z-index: 15;" data-inline-svg="true">
+<img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/ca70de1de5ebddeb4af36c61978f9f99.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" height="128" id="Layer_1" version="1.1" viewbox="0 0 128 128" width="128" xml:space="preserve" preserveaspectratio="xMidYMid meet"><g><g><path d="M56,40H24v32h32V40z M24,88h80v-8H24V88z M24,104h80v-8H24V104z M64,40v8h40v-8H64z M64,64h40v-8H64V64z" fill="#B0BEC5"></path></g></g><path d="M120,0H8C3.59,0,0,3.59,0,8v112c0,4.41,3.59,8,8,8h112c4.41,0,8-3.59,8-8V8C128,3.59,124.41,0,120,0z M100,8  c2.211,0,4,1.789,4,4s-1.789,4-4,4s-4-1.789-4-4S97.789,8,100,8z M28,8h56c2.211,0,4,1.789,4,4s-1.789,4-4,4H28  c-2.211,0-4-1.789-4-4S25.789,8,28,8z M12,8c2.211,0,4,1.789,4,4s-1.789,4-4,4s-4-1.789-4-4S9.789,8,12,8z M120,112  c0,4.41-3.59,8-8,8H16c-4.41,0-8-3.59-8-8V32c0-4.41,3.59-8,8-8h96c4.41,0,8,3.59,8,8V112z M116,16c-2.211,0-4-1.789-4-4  s1.789-4,4-4s4,1.789,4,4S118.211,16,116,16z" fill="#546E7A"></path></svg>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 241px; top: 210px;" data-block-id="19c9e688cbde4003c22980d753e1edda"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 140px; left: 76px; top: 351px;" data-block-id="9a8f21b7b3640da53827551359be757c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 17;">
+<p>web page</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 118px; height: 118px; left: 742px; top: 211px;" data-block-id="123d445b9ff3e7d33db0a16466247da5"><div class="sl-block-content" style="z-index: 18;" data-inline-svg="true">
+<img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/3b4014bb745dacee927eca552603505f.svg"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" id="Layer_1" version="1.1" viewbox="0 0 128 128" xml:space="preserve" width="128" height="128" preserveaspectratio="xMidYMid meet"><circle cx="64" cy="64" fill="#4B5F83" id="circle" r="64"></circle><g id="server_2_"><g id="bottom_lines"><rect fill="#22313F" height="3" id="right" width="10" x="34" y="84"></rect><rect fill="#22313F" height="3" id="left" width="10" x="83.9" y="84"></rect></g><g id="_x30_2_1_"><rect fill="#E6E6E6" height="3" id="line" width="60" x="34" y="61"></rect><path d="M95,84H33c-2.2,0-4-1.8-4-4V68c0-2.2,1.8-4,4-4h62c2.2,0,4,1.8,4,4v12C99,82.2,97.2,84,95,84z" fill="#FFFFFF" id="bg_1_"></path><circle cx="90.9" cy="74" fill="#26A65B" id="green_1_" r="3"></circle><circle cx="81.9" cy="74" fill="#CF000F" id="red_1_" r="3"></circle><g id="lines_1_"><rect fill="#E6E6E6" height="10" id="line_6_" width="3" x="34" y="69"></rect><rect fill="#E6E6E6" height="10" id="line_5_" width="3" x="40" y="69"></rect><rect fill="#E6E6E6" height="10" id="line_4_" width="3" x="46" y="69"></rect></g></g><g id="_x30_1"><path d="M95,61H33c-2.2,0-4-1.8-4-4V45c0-2.2,1.8-4,4-4h62c2.2,0,4,1.8,4,4v12C99,59.2,97.2,61,95,61z" fill="#FFFFFF" id="bg"></path><circle cx="90.9" cy="51" fill="#26A65B" id="green" r="3"></circle><circle cx="81.9" cy="51" fill="#CF000F" id="red" r="3"></circle><g id="lines"><rect fill="#E6E6E6" height="10" id="line_3_" width="3" x="34" y="46"></rect><rect fill="#E6E6E6" height="10" id="line_2_" width="3" x="40" y="46"></rect><rect fill="#E6E6E6" height="10" id="line_1_" width="3" x="46" y="46"></rect></g></g></g></svg>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 561px; top: 211px;" data-block-id="f9d3245774096ca7a5f9f66ee30726e1"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 19; transition-duration: 1s; transition-delay: 3s;" data-animation-type="fade-out"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 338px; top: 281px;" data-block-id="b64a0685e58e73098d56803369fcf676"><div class="sl-block-style" style="z-index: 20; transform: rotate(180deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 20;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 658px; top: 282px;" data-block-id="c2d981a7a21ba1f39e6cbfe1f44c4a41"><div class="sl-block-style" style="z-index: 21; transform: rotate(180deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 21; transition-duration: 1s; transition-delay: 3s;" data-animation-type="fade-out"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 139px; left: 732px; top: 351px;" data-block-id="41c00328954eae0315e6862bac6632ab"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 22;">
+<p>server</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 532px; top: 367px;" data-block-id="8537c880a89a8477c007b8bb88129c9b"><div class="sl-block-style" style="z-index: 23; transform: rotate(45deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 23;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 63px; height: 47px; left: 561px; top: 486px;" data-block-id="b87d71548baaef4533eb2c1891c0d00d"><div class="sl-block-style" style="z-index: 24; transform: rotate(225deg);"><div class="sl-block-content arrow-move" data-shape-type="symbol-thin-arrow-right" data-shape-fill-color="rgb(136, 136, 136)" data-shape-stretch="true" style="z-index: 24;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="2 4 28 24"><g class="shape-element" fill="rgb(136, 136, 136)"><path d="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"></path></g></svg></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 408px; left: 486px; top: 640px;" data-block-id="1149ecdb001194546d61e90c34eded50"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 25;">
+<p>Cache storage (sw cache)</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 131px; height: 131px; left: 631px; top: 510px;" data-block-id="90863ba13bbcd29fa026e58542d9e977"><div class="sl-block-content" style="z-index: 26;"><img data-natural-width="128" data-natural-height="128" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/96ca9d44ec060923b991130325a10d48.svg"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 131px; height: 131px; left: 575px; top: 217px;" data-block-id="d09074878ac89407ebefb0b62e95720b"><div class="sl-block-content" style="z-index: 27; transition-duration: 1s; transition-delay: 1s;" data-animation-type="scale-up"><img data-natural-width="512" data-natural-height="512" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/24260c88dbb6ccfcad3d7a3812a8c6a6.svg"></div></div></section></section><section data-id="9059569661fdd172097e9acb16acdbf1"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="326951c2ec1bf8267419424c1012db8e"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Philosophy time!</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 622px; height: 350px; left: 169px; top: 175px;" data-block-id="beb43d79b7878e106358263bb53d7ab0"><div class="sl-block-content" style="z-index: 12;"><img data-natural-width="480" data-natural-height="270" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/35dfcd3b9d86cbd1c10ea79ae01a1963.gif"></div></div></section><section data-id="010cfb79c61fbfe7a6c0d3027f6dd011"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="652e7ec24f7bd86bffa17de88eba5507"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Philosophy time!</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="4339821dae4f516f03fe10d1ebcdbd68"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 210px;" data-block-id="e163bfdf30e35ea39043460cf497ec80"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<ul>
+	<li style="color:rgb(255, 255, 255); text-align:left">Get as much resources as possible <span style="color:#FFD700">cached on the browser</span> and <span style="color:#FFD700">cache new assets in real time</span>
+</li>
+	<li style="color:rgb(255, 255, 255); text-align:left">Cached information is <span style="color:#FFD700">better than nothing</span> or waiting ages for a slow network</li>
+	<li style="color:rgb(255, 255, 255); text-align:left">The user is happy in all scenarios:
+	<ul>
+		<li style="color:rgb(255, 255, 255); text-align:left">Online</li>
+		<li style="color:rgb(255, 255, 255); text-align:left">Offline</li>
+		<li style="color:rgb(255, 255, 255); text-align:left">Li-fi</li>
+	</ul>
+	</li>
+</ul>
+</div></div>
+
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 800px; left: 80px; top: 140px;" data-block-id="3c38d75cbfe1d0de560c9741ddade96a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align: left;"><span style="color:rgb(255, 255, 255); text-align:left">Offline first philosophy:</span></p>
+</div></div></section><section class="stack" data-id="1d9676275644cf768c0c9293a0e584ea"><section data-id="535a70c563b762b4cac8e2f48d6062ad"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="3cf7f46aeb224df748db928020d122df"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="aed5e2a0587631a6be51e73963fb4b79"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="e5f5b9d2cab0844b435a7b5949f49260"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p style="text-align:left"><span style="color:rgb(255, 255, 255); text-align:left">Checking availability</span></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 800px; height: 166px; left: 80px; top: 210px;" data-block-id="c0d606d3bd48de3514f1861f5c3eb203"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="522" data-natural-height="108" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/e092e4a03471cac6fd23a53ffbd95591.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 800px; left: 80px; top: 420px;" data-block-id="56b8f967d93aa9663f0db85f7db40559"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<p>or</p>
+
+<p><a href="https://jakearchibald.github.io/isserviceworkerready/" target="_blank">https://jakearchibald.github.io/isserviceworkerready</a></p>
+</div></div></section><section data-id="a83d31c22af8e75c65c5e28607aacc68"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="5bf23b513e45afd7464417492852104a"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="13a64fff826c48ffb2a74bfc7d17a1b9"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="3a8dad2a3bb25ff4f6c3eca24a4b35d9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p style="text-align:left"><span style="color:rgb(255, 255, 255); text-align:left">Registering a service worker</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 401px;" data-block-id="54d12b0d9c5447953aa7958a7928b872"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align: left;">Yep, it's that easy!</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 800px; height: 155px; left: 80px; top: 210px;" data-block-id="f087470b1049bfac742d83bd594270f2"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="680" data-natural-height="132" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/00eaeb9b4726831430740ccdcae3be02.png"></div></div></section><section data-id="e17f5535026bcdc16211715bcba191f6"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="f9f4da66b469697ac7f90473880907ff"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="b0b7a6135ad5a8192c0f10bf26d66511"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="d4e3cdd1d18cf487948061b93cae0876"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p style="text-align:left"><span style="color:rgb(255, 255, 255); text-align:left">Careful with your scope!</span></p>
+</div></div>
+
+<div class="sl-block" data-block-type="image" style="width: 800px; height: 155px; left: 80px; top: 210px;" data-block-id="e516fbc92298bc1327957b2fa60239e6"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="680" data-natural-height="132" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/00eaeb9b4726831430740ccdcae3be02.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 280px; height: 210px; left: 340px; top: 420px;" data-block-id="6fc9cf8ed7259d07abde2251b5308ec6"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="300" data-natural-height="225" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/c611d211bf1606ca2e8bf3d319ae375c.gif"></div></div></section></section><section class="stack" data-id="0bef01cff8f1be7daf6d2361f39bbaa4"><section data-id="64b402f8de93e8e42a1efd9c6e938046"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="f580ee2a67ca63babff75a8bd9514bba"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="dd03c15b7a565bc1166d9e4186d01b58"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 160px;" data-block-id="5132bb0de800de144379669054987d8b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<h3 style="color: rgb(33, 33, 33);"><span style="color:#FFFFFF">First install diagram</span></h3>
+</div></div>
+
+<div class="sl-block" data-block-type="iframe" style="min-width: 30px; min-height: 30px; width: 480px; height: 363px; left: 240px; top: 210px;" data-block-id="65f8786c85383e5fcfe359e0e01ed11a"><div class="sl-block-content" style="z-index: 13;"><iframe webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" sandbox="allow-forms allow-scripts allow-popups allow-same-origin allow-pointer-lock" data-src="https://google-developers.appspot.com/web/fundamentals/instant-and-offline/service-worker/lifecycle_24182cfd8a4a504321a9c5b5e62260f4.frame?hl=en"></iframe></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 221px; left: 520px; top: 560px;" data-block-id="836aa1a9afc7f2f58dedda8e04461a4c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<pre style="text-align:center"><span style="font-size:0.5em"><a href="https://developers.google.com/web/fundamentals/instant-and-offline/service-worker/lifecycle" target="_blank">© Google, Inc</a></span></pre>
+</div></div></section><section data-id="46caf13af98440173936768294af4cf4"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="df3c42b587dd4b5b0bc52b9739df7e1b"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="465b7dc6593f0fa33c5b9f51f5a0feb1"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="ac7ae190c3a62c2ddfba4244e488a175"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<h3 style="color: rgb(33, 33, 33); text-align: start;"><span style="color:#FFFFFF">Install</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 210px;" data-block-id="9f3a48be8e0524ab9ae394f3788be969"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align:left">First event, triggered as soon as it <span style="color:#FFD700">executes</span></p>
+
+<p style="text-align:left"><span style="color:#FFD700">Once </span>per service worker</p>
+
+<p style="text-align:left">Opportunity to <span style="color:#FFD700">start caching</span> before being able to control clients</p>
+
+<p style="text-align:left">The promise passed to event.waitUntil() tells the browser when instalation is successful</p>
+
+<p style="text-align:left">If promise rejects, install has failed and service worker is thrown away :(</p>
+</div></div>
+</section><section data-id="a6d7b3548da4442cbe0eb3cf8b722cfc"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="d31858062127527840d62f77c8e4833b"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="8374319a46863cda4feaa7402bd59c98"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="aaafd1f7ba0600ae5479a2b903671b52"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<h3 style="color: rgb(33, 33, 33); text-align: start;"><span style="color:#FFFFFF">Install</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 800px; height: 143px; left: 80px; top: 210px;" data-block-id="cc86cb5c5d176074925fec1d2631e2fa"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="644" data-natural-height="115" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/ec46f007b44d5b28db16eb97db1671de.png"></div></div></section><section data-id="9be03a086471157b13fe58b8b8a980e0"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="954f500d3d52b3731e39c7159420824f"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="49cb5124aadf03a073bc996a3355cfa4"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="37bf9db72a5a53a5a41040aed44d5b38"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">Activate</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 800px; left: 80px; top: 210px;" data-block-id="6d5a98ffb1fd015142f7a2ed5ad3b665"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align:left">Ready to <span style="color:#FFD700">control</span> clients</p>
+
+<p style="text-align:left"><span style="color:#FFD700">Does not guarantee</span> that the page that called .register() will be controlled</p>
+
+<p style="text-align:left">If a page loads without a service worker, <span style="color:#FFD700">neither will its sub-resources</span>. If you load a second time though, fetch events will be intercepted.</p>
+
+<p style="color:rgb(255, 255, 255); text-align:left">Handle <span style="color:#FFD700">push</span> and <span style="color:#FFD700">sync</span></p>
+</div></div>
+</section><section data-id="d5acd04874f9c0e88ea45d59208e80f8"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="b7dc23d7c2bb7c261d730ba877480cb6"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Service Worker life cycle</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="1cb2715bdb817fb61ee38a23033581a3"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="4e6165eaf0f5808fe0d94be2c975c846"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">Activate</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 800px; height: 193px; left: 80px; top: 210px;" data-block-id="c96292727364f7525cd4f6079c3f1bd0"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="489" data-natural-height="118" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f988cb1a3e7ba17a7705305397e4e285.png"></div></div></section></section><section class="stack" data-id="5c42ede0e48b041eb698de94b980372b"><section data-id="79b321658f8ae0809934fb5b445782b3"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="863fed213c45c4ed0a3a3a26e0c7b9cc"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Life cycle on updates</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="5582b212765f798704a7e86c5029f515"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="22662647c472ae7aa073a85e817099fd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">What about service worker updates?</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 350px; height: 350px; left: 305px; top: 245px;" data-block-id="be089524db404c8fe5e1a21b9bc79f25"><div class="sl-block-content" style="z-index: 13;"><img data-natural-width="320" data-natural-height="320" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/ac3187b307a79f7025c633b91b34a9f7.gif"></div></div></section><section data-id="c23ff8540d7a950d8bf4a8ac2e443201"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="669319ded75ef31d1b8001aab7ca64fb"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Life cycle on updates</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="7084666514c9050149ee94bbd28eff32"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+<div class="sl-block" data-block-type="iframe" style="min-width: 30px; min-height: 30px; width: 480px; height: 357px; left: 240px; top: 210px;" data-block-id="26400222d02d9fa52f35262cb1fbf530"><div class="sl-block-content" style="z-index: 12;"><iframe webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" sandbox="allow-forms allow-scripts allow-popups allow-same-origin allow-pointer-lock" data-src="https://google-developers.appspot.com/web/fundamentals/instant-and-offline/service-worker/lifecycle_e9ff0ea6f90a329d73a9d3c1ca6bd7a2.frame?hl=en"></iframe></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 221px; left: 520px; top: 560px;" data-block-id="a47a4739f2f669c663979c11002288e3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<pre style="text-align:center"><span style="font-size:0.5em"><a href="https://developers.google.com/web/fundamentals/instant-and-offline/service-worker/lifecycle" target="_blank">© Google, Inc</a></span></pre>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="9ff69c8b6bd3ba117948ce649ff635ce"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<h3 style="color:rgb(33, 33, 33)"><span style="color:#FFFFFF">Cool diagram!</span></h3>
+</div></div></section><section data-id="00ae58a38670e03a3718a35b8682b1e4"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="2879bd26ea35911101af501e69b7cda4"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Life cycle on updates</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="bd3f7ad7a992b3eac5b76d6318286981"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="9db42bed0782cae32dda9de635ddc140"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">Install</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 800px; left: 80px; top: 210px;" data-block-id="5b6d94ec39d24f2e6189e7acf7c09c7e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<p style="text-align:left">Will be triggered after <span style="color:#FFD700">version has changed</span></p>
+
+<p style="text-align:left">Allows to set up a <span style="color:#FFD700">new cache</span> without overwriting current one, which the "old" service worker is using</p>
+
+<p style="text-align:left">Some cache might not be version specific (avatars, logo, etc.)</p>
+</div></div></section><section data-id="2be04e31ff0881f20dfbd75c881dcd26"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="e6a268bde228afc5de3a6a56b18194dd"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Life cycle on updates</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="d4d178416d5f27c062cd61ca6e0695cd"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="450ea576790f9a1b7f4b16dc7a031b21"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">Waiting</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 800px; left: 80px; top: 210px;" data-block-id="e1dc041e61c4c7562488b3409bb3d237"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<p style="text-align:left">Activation <span style="color:#FFD700">is delayed</span> until existing service worker no longer controls clients</p>
+
+<p style="text-align:left">Guarantees <span style="color:#FFD700">only one version</span> of the service worker is running</p>
+
+<p style="text-align:left">Refreshing might not be enough.</p>
+
+<p style="text-align:left">The current page doesn't go away until the response headers have been received, and even if response has a Content-Disposition header.</p>
+
+<p style="text-align:left">Similar to how Chrome updates.</p>
+</div></div></section><section data-id="f958b6be04a376995c40e0340c060a27"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="503cd03b09a81206c11a75ee84366015"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Life cycle on updates</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="48cb3534a893ac926af08392f3da8ab6"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="59c3cf1fbf8b84b279d0688988fc9550"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">Activate</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 210px;" data-block-id="ba7785b5f6f06c1b8e665686ba7809e3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p style="text-align:left">When old service worker is <span style="color:#FFD700">gone</span></p>
+
+<p style="text-align:left">New service worker can control clients</p>
+
+<p style="text-align:left">Time to <span style="color:#FFD700">migrate databases</span> / <span style="color:#FFD700">clear caches</span></p>
+
+<p style="text-align:left">Please do <span style="color:#FFD700">delete old caches</span>!</p>
+</div></div></section></section><section class="stack" data-id="598b698d08ffb70f2916e867d4e7213d"><section data-id="87adfd3d5c05f4b83c7b77b8ecf704a4"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="a45a84428712cde00167521931d22833"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Lifecycle extra points</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="9ffe95a5d20c65d440840ec1ba9db733"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="e08a532ec069f65833b27e439d2f75bb"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<h3 style="color:rgb(33, 33, 33); text-align:start"><span style="color:#FFFFFF">Skipping the waiting phase</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 210px;" data-block-id="40387e9d99f514e4a58d7884c1aaab2e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p style="text-align:left">When old service worker is <span style="color:#FFD700">gone</span></p>
+
+<p style="text-align:left">New service worker can control clients</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 609px; height: 280px; left: 176px; top: 350px;" data-block-id="ae4ecb3ddae11b02a950f8177a8add74"><div class="sl-block-content" style="z-index: 15;"><img data-natural-width="383" data-natural-height="176" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/3311e2392c6b3ff3f3c62687554d8de1.png"></div></div></section><section data-id="82cf52943920d077490d0acf97e9d9cd"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="8d02039ada273389a5391cc4d0cd1e83"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Lifecycle extra points</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="ce933911e898c8bf8809c75bfe3ad4fc"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="3a7b2d290716bf7e88d35d8ab723023f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<h3 style="color:rgb(33, 33, 33); text-align:start">
+<span style="color:#FFFFFF">Updating... Manually?  </span><span style="color:#FFFFFF">¯\_(⊙︿⊙)_/¯</span>
+</h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 210px;" data-block-id="da0adba5f97b6645c6da24a9ad35d367"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p style="text-align:left">It's also possible to force an update via code!</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 800px; height: 166px; left: 80px; top: 280px;" data-block-id="ace2ac32fa73021a572a58d771981c32"><div class="sl-block-content" style="z-index: 15;"><img data-natural-width="468" data-natural-height="97" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/a5fad6502ef3c273c80545a733e3ca05.png"></div></div></section></section><section class="stack" data-id="a9bdda99f3a725325b386640af202b6a"><section data-id="438ddb9d34cb90e714ea8456ff661751"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="0aa307e816c46ef2ee0abe8caf4a19ec"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>Last minute special!</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="be571f0227405ebe0c0fdc8cb78a11b7"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 800px; left: 80px; top: 140px;" data-block-id="d9c97c0935a1108141469ec25c9ddb37"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align: left;"><span style="font-size:1.2em">Callbacks for state changes</span></p>
+
+<p style="text-align: left;"> </p>
+
+<p style="text-align: left;"><span style="font-size:1.2em">Client finding when the controller has changed</span></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 234px; height: 280px; left: 363px; top: 350px;" data-block-id="cd6b22a10ad8bfe0c71e979e69c73558"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="188" data-natural-height="225" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/88d56168bec8a7d6eaafb4298d3e70d6.gif"></div></div></section><section data-id="f8ba1240bd4e4ce73a8cb0fe36a50629"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="71f5b929a0c8ff2eeab94eeee9ecf296"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>Last minute special!</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="a4ec8ff155aec3994189caee9c4b1a23"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="image" style="width: 716px; height: 490px; left: 122px; top: 140px;" data-block-id="a60bb945b731a2f24e20b2ef6ed8ff73"><div class="sl-block-content" style="z-index: 12;"><img data-natural-width="755" data-natural-height="517" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/eb085979d19377da5b14f6fb15dbfd40.png"></div></div></section></section><section class="stack" data-id="059e1f40878c0bf88982e974aeff245a"><section data-id="55217df3ff18ac59a6d7caa3727ad2e1"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="c1a5ab314f15e4803fab27c11160ba1b"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>After class extras - I</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="c9c28d41873ba58f6f6ae72ae8b289c4"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="4c01da60b36be2f1a1837ab826d40d14"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align:left"><span style="font-size:36px">You can detect when you're <span style="color:#FFD700">online</span> and<span style="color:#FFD700"> offline</span>!</span></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 800px; height: 213px; left: 80px; top: 244px;" data-block-id="d825f888f274523facb27635a3fe41de"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="510" data-natural-height="136" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/ef7d5400bcb736b1abd8b14714f7ee9d.png"></div></div></section><section data-id="2baefdbfeef2e3ecc8792c69b325159d"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="1a47670fc4668414d60086a3af88056a"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>After class extras - II</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="c97255219a99db07774d0f9b74478f89"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="eb471f1d7d530c703188d6f9eef4f26e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;" dir="ui">
+<p style="text-align:left"><span style="font-size:0.9em"><span style="color:#FFD700">Readable streams</span> - the new boy on the block:​​​​​</span></p>
+
+<p style="text-align:left"> </p>
+
+<p style="color:rgb(255, 255, 255); text-align:left"><span style="font-size:0.9em">Browsers are already pretty good at <span style="color:rgb(255, 215, 0)">interpreting streams</span></span></p>
+
+<p style="text-align:left"> </p>
+
+<p style="text-align:left"><span style="font-size:0.9em">Streaming HTML, in collusion with best practices (e.g. inline CSS) can drastically increase <span style="color:#FFD700">First Meaningful Paint</span> time</span></p>
+
+<p style="text-align:left"> </p>
+
+<p style="text-align:left"><span style="font-size:0.9em">Useful gist: <a href="https://gist.github.com/jakearchibald/64e26e7a1d9b06b3fa3ec0383f2b1f91" target="_blank">https://gist.github.com/jakearchibald/64e26e7a1d9b06b3fa3ec0383f2b1f91</a></span></p>
+</div></div></section><section data-id="b4ada128fecdaa4d6b568f9c60388d0c"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="0518acbe86c16d81096fa1307a6c2b80"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11; text-align: center;" dir="ui">
+<h1>After class extras - III</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="525bfd590ad64f067b4c80229dbb304c"><div class="sl-block-content" style="z-index: 10;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="8d90f1e5a3b51251afebae2b3ab5e10b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;" dir="ui">
+<p style="text-align:left"><span style="font-size:0.9em"><span style="color:#FFD700">IndexedDB</span> - a database on your browser!​​​​​</span></p>
+
+<p style="text-align:left"> </p>
+
+<ul>
+	<li style="text-align:left">
+<span style="color:rgb(255, 255, 255); text-align:left">A good alternative for bad </span><span style="color:rgb(255, 215, 0); text-align:left">local storage </span><span style="color:rgb(255, 255, 255); text-align:left">abuses</span>
+</li>
+	<li style="text-align:left">
+<span style="color:rgb(255, 255, 255); text-align:left">You can perform </span><span style="color:rgb(255, 215, 0); text-align:left">CRUD </span><span style="color:rgb(255, 255, 255); text-align:left">operations</span>
+</li>
+	<li style="text-align:left">
+<span style="color:rgb(255, 255, 255); text-align:left">You can set a </span><span style="color:rgb(255, 215, 0); text-align:left">data schema </span><span style="color:rgb(255, 255, 255); text-align:left">and add </span><span style="color:rgb(255, 215, 0); text-align:left">indexes </span><span style="color:rgb(255, 255, 255); text-align:left">to perform fast queries</span>
+</li>
+	<li style="color:rgb(255, 255, 255); text-align:left">Also supports <span style="color:rgb(255, 215, 0)">upgrades</span>
+</li>
+	<li style="color:rgb(255, 255, 255); text-align:left">
+<span style="color:rgb(255, 255, 255); text-align:left">And it works when you're </span><span style="color:rgb(255, 215, 0)">offline!</span>
+</li>
+</ul>
+</div></div></section><section data-id="8845079b7b7130fcf9df49631c2175d0"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="3f61c3365818ad4fc4762d4fa6017168"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>After class extras - IV</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="2c6c3a1ba714d2426230d11803630a88"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 140px;" data-block-id="c10cfa21d30f7ef85bc6b0ee97e6e20e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;" dir="ui">
+<p style="text-align:left"><span style="font-size:1.0em"><span style="color:#FFD700">Services workers</span> aren't the only ones who can access​​​​​ <span style="color:rgb(255, 215, 0); text-align:left">cache storage</span></span></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 698px; height: 325px; left: 131px; top: 258px;" data-block-id="aee6dc50621b341efed99e60cccf0cd6"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="1018" data-natural-height="474" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/5af3d5d2a90c26a6c4267428e94be30d.png"></div></div></section></section><section data-id="884d80ef75f58bbd4dd3ea64b5cbd429"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="49037b6c4143b31bbdece41a82c327e7"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>A bit of (shameless)</h1>
+
+<h1>self promotion</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="2fbe1e0fd024143b2a8e4e8089387c3b"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 237px;" data-block-id="341c5379d5a73919ab5aa552e5cda1df"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;" dir="ui">
+<p style="text-align:left">Progressive Web App experiment available at:</p>
+
+<p style="text-align:left"><a href="https://github.com/AdamModus/offline-todo-list" target="_blank">https://github.com/AdamModus/offline-todo-list</a></p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 374px; height: 280px; left: 293px; top: 350px;" data-block-id="5c3343bc7ffb169fb0d03b06be41484c"><div class="sl-block-content" style="z-index: 14;"><img data-natural-width="467" data-natural-height="350" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/fa686c1b422a6ae237cdee85476be2b3.gif"></div></div></section><section data-id="3c55b5a0fbb4007ce674499e6e8ea6d3"><div class="sl-block" data-block-type="text" style="width: 960px; left: 0px; top: 0px; height: auto;" data-block-id="8d0fb0bccb165b29a2dd6bcd4cbace13"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12; text-align: center;" dir="ui">
+<h1>The last slide, phew!</h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="width: 123px; height: 95px; left: 0px; top: 605px;" data-block-id="8553af54e446684242fca0aca9a81420"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="449" data-natural-height="347" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/f74a9eeb3a97ce6873fa16add9172b46.gif"></div></div>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 400px; left: 80px; top: 170px;" data-block-id="d268d09f561ee2b4daf334c330e89431"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;" dir="ui">
+<h3 style="text-align:left">OK, I'll shut up now.</h3>
+
+<h3 style="text-align:left">Unless, maybe...</h3>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 427px; left: 533px; top: 177px;" data-block-id="f892a42a977426ebaad644b322b16f83"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<h1 style="color:rgb(255, 255, 255); text-align:left"><span style="color:#FFD700">Questions?</span></h1>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 320px; height: 180px; left: 80px; top: 380px;" data-block-id="81176d3a176557384f427db5172fc4d0"><div class="sl-block-content" style="z-index: 16;"><img data-natural-width="640" data-natural-height="360" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/fbd4249207e9978506a1cacae239530e.gif"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 362px; height: 180px; left: 499px; top: 380px;" data-block-id="e82b0d24ac5ba5ff539f6c657e711461"><div class="sl-block-content" style="z-index: 17;"><img data-natural-width="400" data-natural-height="199" data-src="service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f/854ef997ef31b17a690207cf8575abc4.gif"></div></div></section>
+			</div>
+		</div>
+
+		<script>
+			var SLConfig = {"deck": {"id":971389,"slug":"service-worker-crash-course-f0409bff-3ed5-4c45-ac7b-80e86db9c24f","title":"Service Worker Crash Course - msoscamp","description":"","width":960,"height":700,"visibility":"all","published_at":"2017-04-03T21:56:06.548Z","sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/ee78e3c8834f7f0f9b0cf4a3e6bd14d2/thumb.jpg","view_count":2,"user":{"id":518170,"username":"ajrkemp","name":null,"description":null,"thumbnail_url":"https://www.gravatar.com/avatar/c8c46b770fd7b440f2ae66d0729f7e9b?s=140\u0026d=https%3A%2F%2Fs3.amazonaws.com%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":null,"settings":{"id":360953,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true}},"background_transition":"slide","transition":"slide","theme_id":null,"theme_font":"montserrat","theme_color":"asphalt-orange","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"should_loop":false,"share_notes":false,"slide_number":true,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":1,"data_updated_at":1491333113965,"font_typekit":null,"font_google":null,"notes":{}}};
+
+
+			// Use local fonts
+			SLConfig.fonts_url = 'lib/fonts/';
+		</script>
+
+		<script src="lib/head.min.js"></script>
+		<script src="lib/reveal.min.js"></script>
+		<script src="lib/offline.js"></script>
+
+		<!-- Initialize the presentation -->
+		<script>
+			Reveal.initialize({
+				width: 960,
+				height: 700,
+				margin: 0.05,
+
+				controls: true,
+				progress: true,
+				history: true,
+				mouseWheel: false,
+				showNotes: false,
+				slideNumber: true,
+
+				autoSlide: 0 || 0,
+				autoSlideStoppable: true,
+
+				center: false,
+				loop: false,
+				rtl: false,
+
+				transition: "slide",
+				backgroundTransition: "slide",
+
+				dependencies: [
+					{ src: 'lib/reveal-plugins/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'lib/reveal-plugins/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'lib/reveal-plugins/highlight/highlight.js', async: true, callback: function() { hljs.initHighlighting(); hljs.initHighlightingOnLoad(); } },
+					{ src: 'lib/reveal-plugins/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+		</script>
+
+		
+
+	</body>
+</html>
